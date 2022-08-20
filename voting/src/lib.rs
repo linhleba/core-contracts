@@ -29,8 +29,10 @@ impl Default for VotingContract {
     }
 }
 
+// change struct to a smart contract
 #[near_bindgen]
 impl VotingContract {
+    /// initialize the state of a contract without having a previous stake (no need to pass the argument)
     #[init]
     pub fn new() -> Self {
         assert!(!env::state_exists(), "The contract is already initialized");
@@ -75,15 +77,17 @@ impl VotingContract {
 
     /// Method for validators to vote or withdraw the vote.
     /// Votes for if `is_vote` is true, or withdraws the vote if `is_vote` is false.
+    /// vote '{"isvote": true}' - must call with type of json format
     pub fn vote(&mut self, is_vote: bool) {
         self.ping();
         if self.result.is_some() {
             return;
         }
+        /// three types of account: predecessor, signer, current
         let account_id = env::predecessor_account_id();
         let account_stake = if is_vote {
             let stake = env::validator_stake(&account_id);
-            assert!(stake > 0, "{} is not a validator", account_id);
+            // assert!(stake > 0, "{} is not a validator", account_id);
             stake
         } else {
             0
